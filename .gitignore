@@ -1,0 +1,23 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+target
+*.class
+
+*.log
+.settings
+.project
+logs
+job
+
+# 忽略所有目录下的YAML文件（**/*.yml已包含当前目录，无需额外写*.yml）
+**/*.yml
+
+# 排除所有目录下的“*-dev.yml”文件（一条规则即可覆盖所有目录，无需拆分）
+!**/*-dev.yml
