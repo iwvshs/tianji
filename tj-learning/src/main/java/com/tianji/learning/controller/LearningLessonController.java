@@ -67,7 +67,7 @@ public class LearningLessonController {
     //统计课程的学习人数
     @GetMapping("/{courseId}/count")
     @ApiOperation("统计课程的学习人数")
-    public Long countLearningLessonByCourse(@PathVariable("courseId") Long courseId){
+    public Integer countLearningLessonByCourse(@PathVariable("courseId") Long courseId){
         return lessonService.countLearningLessonByCourse(courseId);
     }
 

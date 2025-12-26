@@ -189,10 +189,11 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
         learningLessonVO.setSections(courseInfoDTO.getSectionNum());
 
         //5. 统计课表中的课程数量，并设置到VO对象中
-        Long courseNum = lambdaQuery()
-                .eq(LearningLesson::getUserId, userId)
-                .count();
-        learningLessonVO.setCourseAmount(courseNum.intValue());
+        Integer courseNum = baseMapper.selectCount(
+                new QueryWrapper<LearningLesson>()
+                        .eq("user_id", userId)
+        );
+        learningLessonVO.setCourseAmount(courseNum);
 
         //6. 获取最新学习小节名称和序号
         List<Long> sectionIdList = CollUtils.singletonList(learningLesson.getLatestSectionId());
@@ -216,10 +217,11 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
      **/
     @Override
     public LearningLessonVO queryCourseStatus(Long courseId) {
-        LearningLesson learningLesson = this.lambdaQuery()
-                .eq(LearningLesson::getCourseId, courseId)
-                .eq(LearningLesson::getUserId, UserContext.getUser())
-                .one();
+        LearningLesson learningLesson = baseMapper.selectOne(
+                new QueryWrapper<LearningLesson>()
+                        .eq("course_id", courseId)
+                        .eq("user_id", UserContext.getUser())
+        );
 
         if (learningLesson == null) {
             return null;
@@ -240,18 +242,19 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
     // 获取MQ中的通知消息，删除课表中退款课程
     @Override
     public void removeInvalidCoursesFromMQ(Long userId, List<Long> courseIds) {
-        this.remove(lambdaQuery()
-                .eq(LearningLesson::getUserId, userId)
-                .in(LearningLesson::getCourseId, courseIds));
+        this.remove(new QueryWrapper<LearningLesson>()
+                .eq("user_id", userId)
+                .in("course_id", courseIds));
     }
 
     // 查询课表中是否有课程，并查询课程状态是否有效
     @Override
     public Long queryCourseValid(Long courseId) {
-        LearningLesson learningLesson = this.lambdaQuery()
-                .eq(LearningLesson::getCourseId, courseId)
-                .eq(LearningLesson::getUserId, UserContext.getUser())
-                .one();
+        LearningLesson learningLesson = baseMapper.selectOne(
+                new QueryWrapper<LearningLesson>()
+                        .eq("course_id", courseId)
+                        .eq("user_id", UserContext.getUser())
+        );
         //1. 该用户课表中没有该课程，返回null
         if (learningLesson == null) {
             return null;
@@ -279,11 +282,12 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
      * @date: 2025/12/26
      **/
     @Override
-    public Long countLearningLessonByCourse(Long courseId) {
-        Long count = lambdaQuery()
-                .eq(LearningLesson::getCourseId, courseId)
-                .ne(LearningLesson::getStatus, LessonStatus.EXPIRED.getValue()) //查询未过期的课程
-                .count();
+    public Integer countLearningLessonByCourse(Long courseId) {
+        Integer count = baseMapper.selectCount(
+                new QueryWrapper<LearningLesson>()
+                        .eq("course_id", courseId)
+                        .ne("status", LessonStatus.EXPIRED.getValue()) //查询未过期的课程
+        );
 
         return count;
     }
